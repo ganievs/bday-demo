@@ -1,14 +1,14 @@
 package main
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 var (
 	invalidFromat = "2006.01.02"
 	invalidDate   = "2080-01-02"
-	invalidUser   =  "User123"
+	invalidUser   = "User123"
 )
 
 func TestOnlyLetters(t *testing.T) {

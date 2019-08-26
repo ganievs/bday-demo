@@ -1,18 +1,18 @@
 package main
 
 import (
-	"unicode"
-	"strings"
-	"os"
 	"fmt"
-	"net/http"
-	"time"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
+	"net/http"
+	"os"
+	"strings"
+	"time"
+	"unicode"
 )
 
 const (
@@ -28,14 +28,14 @@ var (
 )
 
 type User struct {
-	Name         string `json:"-"`
-	DateOfBirth  string `json:"DateOfBirth"`
+	Name        string `json:"-"`
+	DateOfBirth string `json:"DateOfBirth"`
 }
 
 type Birthdays struct {
 	gorm.Model
-	Name         string `gorm:"column:name"`
-	DateOfBirth  string `gorm:"column:bday"`
+	Name        string `gorm:"column:name"`
+	DateOfBirth string `gorm:"column:bday"`
 }
 
 func dbConfig() map[string]string {
@@ -68,7 +68,7 @@ func dbConfig() map[string]string {
 	return conf
 }
 
-func initDb() (db *gorm.DB, err error){
+func initDb() (db *gorm.DB, err error) {
 	config := dbConfig()
 	connect := fmt.Sprintf("host=%s port=%s user=%s "+
 		"password=%s dbname=%s sslmode=disable",
@@ -80,7 +80,7 @@ func initDb() (db *gorm.DB, err error){
 		panic(err)
 	}
 	fmt.Println("Successfully connected!")
-	
+
 	return
 }
 
@@ -103,7 +103,7 @@ func checkDate(date string) bool {
 
 	// Check the date before current date
 	if c.Before(t) {
-		log.Warn("The birthday date is incorect",)
+		log.Warn("The birthday date is incorect")
 		return false
 	}
 	return true
@@ -114,25 +114,24 @@ func getDiff(date string) string {
 	s := ""
 	t, _ := time.Parse(layoutISO, date)
 	c := time.Now()
-	nextYear := time.Date(c.Year() +1, time.December, 31, 0, 0, 0, 0, time.Local)
+	nextYear := time.Date(c.Year()+1, time.December, 31, 0, 0, 0, 0, time.Local)
 	days := nextYear.YearDay()
 	diff := t.YearDay() - c.YearDay()
 
 	if diff < 0 {
-		s = fmt.Sprintf("Your birthday is in %v day(s)!", diff + days)
+		s = fmt.Sprintf("Your birthday is in %v day(s)!", diff+days)
 	} else if diff == 0 {
 		s = "Happy birthday!"
 	} else {
-		s = fmt.Sprintf("Your birthday is in %v day(s)!", diff + days)
+		s = fmt.Sprintf("Your birthday is in %v day(s)!", diff)
 	}
 	return s
 }
 
 func putData(c echo.Context) error {
 	user := User{c.Param("username"), ""}
-
 	if !onlyLetters(user.Name) {
-		log.Warn("The username must contain only letters"
+		log.Warn("The username must contain only letters")
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("The username: %v must contain only letters", user.Name))
 	}
 
@@ -151,7 +150,7 @@ func putData(c echo.Context) error {
 	db, err := initDb()
 
 	dbPut(user, db)
-	
+
 	return c.String(http.StatusNoContent, "")
 }
 
@@ -168,12 +167,12 @@ func getData(c echo.Context) error {
 		log.Error("Failed connect to DB")
 		return c.String(http.StatusInternalServerError, "Failed connect to DB")
 	}
-	
+
 	log.Printf(user)
 	bday, err := dbGet(user, db)
 	if err != nil {
-		log.Warn("Failed to get Birthday: %v", err)
-		return c.String(http.StatusInternalServerError, "Failed to get Birthday")
+		log.Warn("Failed to get Birthday")
+		return c.NoContent(204)
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{"message": getDiff(bday)})
@@ -203,12 +202,12 @@ func main() {
 	log.SetFormatter(Formatter)
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.WarnLevel)
-	
+
 	e := echo.New()
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-        
+
 	e.GET("/hello/:username", getData)
 	e.PUT("/hello/:username", putData)
 	e.GET("/metrics", echo.WrapHandler(promhttp.Handler()))

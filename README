@@ -1,5 +1,0 @@
-BUILD docker build -t bday .
-
-extra endpoints:
-/metrics - metrics
-/        - health check
