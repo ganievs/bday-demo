@@ -1,0 +1,42 @@
+[
+    {
+        "name": "bday-app",
+        "image": "samolander/bday:latest",
+        "cpu": 10,
+        "memory": 300,
+        "essential": true,
+        "portMappings": [
+             {
+                 "hostPort": 80,
+                 "containerPort": 8000,
+                 "protocol": "tcp"
+             }
+         ],
+        "links": [],
+        "command": [],
+        "entryPoint": [],
+
+        "environment": [
+          {
+            "name": "DB_HOST",
+            "value": "${db_host}"
+          },
+          {
+            "name":"DB_PORT",
+            "value": "5432"
+          },
+          {
+            "name": "DB_USER",
+            "value": "${db_user}"
+          },
+          {
+            "name": "DB_PASS",
+            "value": "${db_password}"
+          },
+          {
+            "name": "DB_NAME",
+            "value": "${db_name}"
+          }
+        ]
+    }
+]
